@@ -26,20 +26,23 @@ module Lita
       def greet(response)
         return unless config.enabled
         user = response.user
-        reply(user) unless is_in_cooldown?(user)
+        if !is_in_cooldown?(user)
+          response.reply("#{random_greet} @#{user.mention_name}!")
+          set_cooldown(user)
+        end
       end
 
-      def reply(user)
-        response.reply("#{random_greet} @#{user.mention_name}!")
-        redis.hset(user.jid, GREETINGS_COOLDOWN_KEY, Time.now + config.cooldown.seconds)
+      def set_cooldown(user)
+        redis.set(cache_key(user), true)
+        redis.expire(cache_key(user), config.cooldown)
       end
 
       def is_in_cooldown?(user)
-        if cooldown = redis.hget(user.jid, GREETINGS_COOLDOWN_KEY)
-          cooldown <= Time.now
-        else
-          false
-        end
+        !!redis.get(cache_key(user))
+      end
+
+      def cache_key(user)
+        "#{user.id}_#{GREETINGS_COOLDOWN_KEY}"
       end
 
       def say(response)
