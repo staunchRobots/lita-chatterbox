@@ -1,0 +1,13 @@
+en:
+  lita:
+    handlers:
+      chatterbox:
+        greetings:
+          - hello
+          - hi
+          - greetings
+          - sup
+          - yo
+          - oy
+          - hola
+          - ola
